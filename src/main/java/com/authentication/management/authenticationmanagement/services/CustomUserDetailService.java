@@ -1,5 +1,6 @@
 package com.authentication.management.authenticationmanagement.services;
 
+import com.authentication.management.authenticationmanagement.models.AuthorizationResponse;
 import com.authentication.management.authenticationmanagement.models.Users;
 import com.authentication.management.authenticationmanagement.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,5 +23,12 @@ public class CustomUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String emailId) throws UsernameNotFoundException {
         final Users user = userRepository.findByEmailId(emailId);
         return new User(user.getEmailId(), user.getPassword(), new ArrayList<>());
+    }
+
+    public AuthorizationResponse getAuthorizedUserDetails(String emailId) {
+        final Users user = userRepository.findByEmailId(emailId);
+        final AuthorizationResponse authorizationResponse = new AuthorizationResponse();
+        authorizationResponse.setRoleType(user.getRoleType());
+        return authorizationResponse;
     }
 }

@@ -2,6 +2,7 @@ package com.authentication.management.authenticationmanagement.controllers;
 
 import com.authentication.management.authenticationmanagement.models.AuthenticationRequest;
 import com.authentication.management.authenticationmanagement.models.AuthenticationResponse;
+import com.authentication.management.authenticationmanagement.models.AuthorizationResponse;
 import com.authentication.management.authenticationmanagement.services.CustomUserDetailService;
 import com.authentication.management.authenticationmanagement.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,13 +11,10 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/authenticate")
+@RequestMapping("/user")
 public class AuthenticationController {
 
     @Autowired
@@ -25,7 +23,18 @@ public class AuthenticationController {
     @Autowired
     private CustomUserDetailService customUserDetailService;
 
-    @PostMapping("/user")
+    private UserDetails userDetails;
+
+    @GetMapping("/authorization")
+    public AuthorizationResponse authorizeUser(@RequestHeader("Authorization") String bearerToken) {
+        final AuthorizationResponse authorizationResponse =
+                customUserDetailService.getAuthorizedUserDetails(userDetails.getUsername());
+        final AuthorizationResponse modifiedResponse = new AuthorizationResponse();
+        modifiedResponse.setRoleType(authorizationResponse.getRoleType());
+        return authorizationResponse;
+    }
+
+    @PostMapping("/authentication")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody final AuthenticationRequest authenticationRequest)
             throws Exception {
         try {
@@ -34,7 +43,7 @@ public class AuthenticationController {
         } catch (BadCredentialsException badCredentialsException) {
             throw new Exception("Invalid username or password", badCredentialsException);
         }
-        final UserDetails userDetails = customUserDetailService.loadUserByUsername(authenticationRequest.getEmailId());
+        userDetails = customUserDetailService.loadUserByUsername(authenticationRequest.getEmailId());
         final String jwtToken = JwtUtils.generateToken(userDetails);
         return ResponseEntity.ok(new AuthenticationResponse(jwtToken));
     }
