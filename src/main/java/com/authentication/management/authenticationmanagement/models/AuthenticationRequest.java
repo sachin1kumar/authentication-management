@@ -2,11 +2,14 @@ package com.authentication.management.authenticationmanagement.models;
 
 public class AuthenticationRequest {
 
-    private String username;
+    private String emailId;
     private String password;
 
-    public AuthenticationRequest(String username, String password) {
-        this.username = username;
+    public AuthenticationRequest() {
+    }
+
+    public AuthenticationRequest(String emailId, String password) {
+        this.emailId = emailId;
         this.password = password;
     }
 
@@ -14,7 +17,7 @@ public class AuthenticationRequest {
         return password;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmailId() {
+        return emailId;
     }
 }
